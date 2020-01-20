@@ -1,0 +1,1 @@
+ANNOTATION_DIR = '/data-disk/synapse-cloudfactory'
