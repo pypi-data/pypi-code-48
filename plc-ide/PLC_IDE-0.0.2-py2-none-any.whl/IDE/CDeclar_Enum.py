@@ -1,0 +1,198 @@
+# -*- coding: utf-8 -*-
+
+###########################################################################
+## Python code generated with wxFormBuilder (version Jun 17 2015)
+## http://www.wxformbuilder.org/
+##
+## PLEASE DO "NOT" EDIT THIS FILE!
+###########################################################################
+
+import wx
+import wx.xrc
+import wx.stc as stc
+from CLogText import LogText
+
+###########################################################################
+## Class Panel_Code
+###########################################################################
+
+class Panel_Enum(wx.Panel):
+
+    def __init__(self, parent,hanndel):
+        wx.Panel.__init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(600, 800),
+                          style=wx.TAB_TRAVERSAL)
+
+        self.parent = hanndel
+        self.edited = 0
+        bz = wx.BoxSizer(wx.VERTICAL)
+
+        self.m_toolBar = wx.ToolBar(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TB_HORIZONTAL)
+        self.m_tool_save = self.m_toolBar.AddTool(wx.ID_ANY, u"tool", wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, ),
+                                                       wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString,
+                                                       None)
+        self.m_tool_refresh = self.m_toolBar.AddTool(wx.ID_ANY, u"tool", wx.ArtProvider.GetBitmap(wx.ART_GO_TO_PARENT, ),
+                                                       wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString,
+                                                       None)
+
+        self.m_toolBar.AddSeparator()
+
+        self.m_tool_add = self.m_toolBar.AddTool(wx.ID_ANY, u"tool",
+                                                      wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, ), wx.NullBitmap,
+                                                      wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString, None)
+
+        self.m_tool_delete = self.m_toolBar.AddTool(wx.ID_ANY, u"tool",
+                                                         wx.ArtProvider.GetBitmap(wx.ART_DEL_BOOKMARK, ), wx.NullBitmap,
+                                                         wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString, None)
+
+        self.m_toolBar.AddSeparator()
+
+        self.m_tool_up = self.m_toolBar.AddTool(wx.ID_ANY, u"tool", wx.ArtProvider.GetBitmap(wx.ART_GO_UP, ),
+                                                     wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString,
+                                                     None)
+
+        self.m_tool_dn = self.m_toolBar.AddTool(wx.ID_ANY, u"tool", wx.ArtProvider.GetBitmap(wx.ART_GO_DOWN, ),
+                                                     wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString,
+                                                     None)
+
+        self.m_toolBar.Realize()
+
+        bz.Add(self.m_toolBar, 0, wx.EXPAND, 5)
+
+        self.list = CustListCtrl(self, wx.ID_ANY,
+                                 style=wx.LC_REPORT
+                                       | wx.BORDER_NONE
+                                       # | wx.LC_SORT_ASCENDING            # Content of list as instructions is
+                                       | wx.LC_HRULES | wx.LC_VRULES  # nonsense with auto-sort enabled
+                                 )
+
+        bz.Add(self.list, 1, wx.ALL | wx.EXPAND, 0)
+
+
+        self.SetSizer(bz)
+        self.Layout()
+
+        # Connect Events
+        self.Bind(wx.EVT_TOOL, self.OnSave, id=self.m_tool_save.GetId())
+        self.Bind(wx.EVT_TOOL, self.OnAdd, id=self.m_tool_add.GetId())
+        self.Bind(wx.EVT_TOOL, self.OnDelete, id=self.m_tool_delete.GetId())
+        self.Bind(wx.EVT_TOOL, self.OnUp, id=self.m_tool_up.GetId())
+        self.Bind(wx.EVT_TOOL, self.OnDn, id=self.m_tool_dn.GetId())
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.list)
+    def __del__(self):
+        pass
+
+    # Virtual event handlers, overide them in your derived class
+    def OnSave(self, event):
+        self.parent.SavePage(self.savedata())
+        self.edited = 0
+        event.Skip()
+
+    def OnAdd(self, event):
+
+        index = self.list.InsertItem(self.list.GetItemCount(), '')
+
+        self.list.SetItemData(index, index)
+        LogText(u'add a line')
+        event.Skip()
+
+    def OnDelete(self, event):
+        print self.currentItem
+        self.list.DeleteItem(self.currentItem)
+        event.Skip()
+
+    def OnUp(self, event):
+        event.Skip()
+
+    def OnDn(self, event):
+        event.Skip()
+
+    def OnItemSelected(self, event):
+        ##print(event.GetItem().GetTextColour())
+        self.currentItem = event.Index
+        print self.currentItem
+        event.Skip()
+
+
+
+    def savedata(self):
+        data = []
+
+        _lenth = self.list.GetItemCount()
+        _cols = self.list.GetColumnCount()
+        for i in xrange(_lenth):
+            lt = []
+            for j in xrange(_cols):
+                v = self.list.GetItem(i,j).GetText()
+                lt.append(v)
+            data.append(lt)
+
+
+        return data
+        pass
+
+    def renderdata(self,data):
+
+        for i in xrange(len(data)):
+            index = self.list.InsertItem(self.list.GetItemCount(), data[i][0])
+            for j in range(1,len(data[i])):
+                self.list.SetItem(index, j, data[i][j])
+
+
+
+    def has_edited(self):
+        self.edited = 1
+        self.parent.PageHasEdited()
+        pass
+
+#----------------------------------------------------------------------
+
+
+import sys
+import wx
+import wx.lib.mixins.listctrl as listmix
+
+
+
+class CustListCtrl(wx.ListCtrl,
+                   listmix.ListCtrlAutoWidthMixin,
+                   listmix.TextEditMixin):
+
+    def __init__(self, parent, ID, pos=wx.DefaultPosition,
+                 size=wx.DefaultSize, style=0):
+        wx.ListCtrl.__init__(self, parent, ID, pos, size, style)
+        self.parent = parent
+        listmix.ListCtrlAutoWidthMixin.__init__(self)
+        self.Populate()
+        listmix.TextEditMixin.__init__(self)
+
+    def OnChar(self, event):
+        self.parent.has_edited()
+        event.Skip()
+        pass
+
+
+
+    def Populate(self):
+        # for normal, simple columns, you can add them like this:
+
+        self.InsertColumn(0, "name")
+        self.InsertColumn(1, "value")
+
+        self.currentItem = 0
+
+
+
+    # def SetStringItem(self, index, col, data):
+    #     if col in range(3):
+    #         wx.ListCtrl.SetItem(self, index, col, data)
+    #         wx.ListCtrl.SetItem(self, index, 3+col, str(len(data)))
+    #     else:
+    #         try:
+    #             datalen = int(data)
+    #         except:
+    #             return
+    #
+    #         wx.ListCtrl.SetItem(self, index, col, data)
+    #
+    #         data = self.GetItem(index, col-3).GetText()
+    #         wx.ListCtrl.SetItem(self, index, col-3, data[0:datalen])
