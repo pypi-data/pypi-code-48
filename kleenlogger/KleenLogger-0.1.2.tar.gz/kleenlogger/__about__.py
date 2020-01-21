@@ -1,0 +1,5 @@
+_title = 'KleenLogger'
+_description = 'Clean Logger system for python application.'
+_version = '0.1.2'
+_author = 'Edenskull'
+_license = 'MIT'
