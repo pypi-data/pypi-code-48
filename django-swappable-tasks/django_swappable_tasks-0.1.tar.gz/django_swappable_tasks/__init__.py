@@ -1,0 +1,1 @@
+from django_swappable_tasks.utils import process_task_asynchronously
